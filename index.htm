@@ -61,24 +61,40 @@
       const margins = { top: 10, right: 10, bottom: 40, left: 50 };
 
       const requestData = async () => {
-        let restaurants = await d3.csv('yelp_boston.csv', d3.autoType)
+        let restaurants = await d3.csv('boston_yelp.csv', d3.autoType)
         
         console.log(restaurants)
 
-        // const boston = await d3.json("BNeighborhoods.geojson");
+        const ma = await d3.json("ma.json");
 
-        console.log(neighborhoods_json)
+        console.log(ma)
 
-        var projection = d3.geoMercator().fitSize([mapWidth, mapHeight], neighborhoods_json)
+        const towns = await d3.json("cities.json");
+
+        console.log(towns)
+
+
+        var projection = d3.geoMercator().fitSize([mapWidth, mapHeight], towns)
 
         var path = d3.geoPath().projection(projection);
 
         var map = svg.append("g").attr("class", "map");
+       
+
+//       var neighborhoods = topojson.feature(ma, ma.objects.cb_2015_massachusetts_county_20m);
+
+
+//       var projection = d3.geoMercator().fitSize([mapWidth, mapHeight], neighborhoods)
+
+//       var path = d3.geoPath().projection(projection);
+
+        var map = svg.append("g").attr("class", "map");
 
         map.selectAll("path")
-            .data(neighborhoods_json.features)
+            .data(towns.features)
             .enter()
             .append("path")
+            .attr("id", d => d.properties.town)
             .attr("class", "neighborhood")
             .style("fill", "white")
             .attr( "stroke", "#999")
@@ -96,6 +112,7 @@
         // Draw circles using the Positions we just made
         map.selectAll("circle").data(restaurants)
           .join("circle")
+          .attr("id", d => d.name)
           .attr("r", 3)
           .attr("fill", "forestgreen")
           .attr("opacity", 1)
