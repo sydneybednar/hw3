@@ -36,8 +36,10 @@
     </style>
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
     <script src="https://unpkg.com/jeezy@1.13.1/lib/jeezy.js"></script>
     <script src="https://unpkg.com/jeezy@1.13.1/lib/jeezy.min.js"></script>
+    <script src="neighborhoods.js"></script>
 
   </head>
   <body>
@@ -51,8 +53,60 @@
     <p> [Intro Here]
     </p>
     </div>
+    <svg id="map", width = "800", height = "800"></svg>
     <script>
+      const svg = d3.select("svg#map")
+      const mapWidth = svg.attr("width")
+      const mapHeight = svg.attr("height")
+      const margins = { top: 10, right: 10, bottom: 40, left: 50 };
+
+      const requestData = async () => {
+        let restaurants = await d3.csv('yelp_boston.csv', d3.autoType)
+        
+        console.log(restaurants)
+
+        // const boston = await d3.json("BNeighborhoods.geojson");
+
+        console.log(neighborhoods_json)
+
+        var projection = d3.geoMercator().fitSize([mapWidth, mapHeight], neighborhoods_json)
+
+        var path = d3.geoPath().projection(projection);
+
+        var map = svg.append("g").attr("class", "map");
+
+        map.selectAll("path")
+            .data(neighborhoods_json.features)
+            .enter()
+            .append("path")
+            .attr("class", "neighborhood")
+            .style("fill", "white")
+            .attr( "stroke", "#999")
+            .attr("d", path);
+
+
+        restaurants.forEach( d => {
       
+          d.Position = projection( [d.longitude, d.latitude] );
+          
+        });
+
+        console.log(restaurants[0])
+        
+        // Draw circles using the Positions we just made
+        map.selectAll("circle").data(restaurants)
+          .join("circle")
+          .attr("r", 3)
+          .attr("fill", "forestgreen")
+          .attr("opacity", 1)
+          .attr("cx", d => d.Position[0])
+          .attr("cy", d => d.Position[1]);
+        
+
+        
+      }
+      requestData();
+
     </script>
    
   </body>
