@@ -53,6 +53,9 @@
     <p> [Intro Here]
     </p>
     </div>
+
+    <div id="buttons"></div>
+    <div>
     <svg id="map", width = "1200", height = "500"></svg>
     <script>
       const svg = d3.select("svg#map")
@@ -101,6 +104,20 @@
             .attr( "stroke", "#999")
             .attr("d", path);
 
+      let buttons = d3.select("#buttons")
+          .selectAll("button")
+          .data(neighborhoods_json.features)
+          .enter()
+          .append("button")
+          .text(d => d.properties.Name)
+          .on("click", selected)
+          .on("mouseover", function(d){
+            const neighborhood = d.properties.Name;
+        d3.select("#" + neighborhood)
+            .style("fill", "lightgray");
+})
+
+         
 
         //Adding the names to the neighborhoods
 
@@ -186,7 +203,6 @@
       //       .style("opacity", 0);
       //   });
 
-
       
 
         function selected(event, d) {
@@ -239,7 +255,21 @@
           .style("font-size", 24)
 
 
-        
+          //TRIED PLACING IN PANEL
+          // var buttonContainer = d3.select("#quiz-panel")
+          // .append("div")
+          // .attr("class", "button-container")
+
+
+          // buttonContainer.selectAll("button")
+          // .data(neighborhoods_json.features)
+          // .enter()
+          // .append("button")
+          // .text(d => d.properties.Name)
+          // .on("click", selected);
+
+
+
 
 
 
