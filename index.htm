@@ -54,13 +54,14 @@
     </p>
     </div>
 
-    <div id="buttons"></div>
-    <div>
-    <svg id="map", width = "1200", height = "500"></svg>
+    <!-- <div id="buttons"></div>
+    <div> -->
+    <svg id="map", width = "600", height = "500"></svg>
+    <svg id="quiz", width="600", height="500", style="border: 1px solid black"></svg>
     <script>
       const svg = d3.select("svg#map")
       const margins = { top: 10, right: 50, bottom: 40, left: 50 };
-      const mapWidth = svg.attr("width")/2
+      const mapWidth = svg.attr("width")
       const mapHeight = svg.attr("height")
 
       const requestData = async () => {
@@ -104,18 +105,18 @@
             .attr( "stroke", "#999")
             .attr("d", path);
 
-      let buttons = d3.select("#buttons")
-          .selectAll("button")
-          .data(neighborhoods_json.features)
-          .enter()
-          .append("button")
-          .text(d => d.properties.Name)
-          .on("click", selected)
-          .on("mouseover", function(d){
-            const neighborhood = d.properties.Name;
-        d3.select("#" + neighborhood)
-            .style("fill", "lightgray");
-})
+      // let buttons = d3.select("#buttons")
+      //     .selectAll("button")
+      //     .data(neighborhoods_json.features)
+      //     .enter()
+      //     .append("button")
+      //     .text(d => d.properties.Name)
+      //     .on("click", selected)
+      //     .on("mouseover", function(d){
+      //       const neighborhood = d.properties.Name;
+      //   d3.select("#" + neighborhood)
+      //       .style("fill", "lightgray");
+      //     })
 
          
 
@@ -167,7 +168,7 @@
         // need to edit translate extent now that map is only half of svg
         var zoom = d3.zoom()
                   .scaleExtent([1,100])
-                  // .translateExtent([[-50,-50],[mapWidth+50,mapHeight+50]])  // to lock to edges
+                  .translateExtent([[-50, -50],[mapWidth+50,mapHeight+50]])  // to lock to edges
                   .on("zoom", neighborhoodZoom);
 
         map.call(zoom);
@@ -203,11 +204,9 @@
       //       .style("opacity", 0);
       //   });
 
-      
-
+    
         function selected(event, d) {
           //NOTE: this is Jeff's code, will change to original code, just wanted to test click and zoom
-          console.log(d)
 
           let bounds = path.bounds(d.geometry); 
           let dx = bounds[1][0] - bounds[0][0]; 
@@ -225,27 +224,18 @@
                                 .translate(translate[0],translate[1])
                                 .scale(scale);
          
-          map.transition().duration(1000).call(zoom.transform, newTransform);
-
-          
+          map.transition().duration(1000).call(zoom.transform, newTransform);         
 
         }
 
         // quiz panel
-        var quiz = svg.append("g").attr("class", "quiz").attr("transform", `translate(${mapWidth}, 0)`)
-        var quizWidth = svg.attr("width") - mapWidth
+        let svg2 = d3.select("svg#quiz")
+        var quiz = svg2.append("g").attr("class", "quiz")
+        var quizWidth = svg2.attr("width")
 
 
         // step one
         let stepOne = quiz.append("g")
-
-        // add rect to see border -- can remove later
-        stepOne.append("rect")
-               .attr("width", quizWidth)
-               .attr("height", mapHeight)
-               .style("fill", "none")
-               .style("stroke", "black")
-               .style("stroke-width", 1)
 
         stepOne.append("text")
           .text("Welcome to Boston!")
@@ -253,24 +243,83 @@
           .attr("y", 30)
           .attr("text-anchor", "middle")
           .style("font-size", 24)
+        
+        stepOne.append("text")
+          .text("Select a neighborhood using the buttons below:")
+          .attr("x", quizWidth / 2)
+          .attr("y", 55)
+          .attr("text-anchor", "middle")
+          .style("font-size", 16)
+
+        let buttonContain = stepOne.append("g").attr("transform", `translate(0, ${mapHeight-410})`)
+
+        let buttons = buttonContain.selectAll("text.button")
+          .data(neighborhoods_json.features)
+          .join("text")
+          .attr("class", "button")
+          .text(d => d.properties.Name)
+          .attr("x", function(d,i){
+            if(i>12){return 400}
+            else{return 30}
+          })
+          .attr("dy", function(d,i){
+            if (i>12){
+              x=i-13
+              return `${x*2}em`
+            }
+            else{return `${i*2}em`}
+          })
+          .on("click", function(event, d){
+            // first run zoom function
+            selected(event, d);
+          })
+          .on("mouseover", function(){
+            d3.select(this).style("fill", "deeppink")
+          })
+          .on("mouseout", function(e){
+            d3.select(this).style("fill", "black")
+          })
+
+      // create a next button? --> clicking this button will return a filtered dataframe for step 2
 
 
-          //TRIED PLACING IN PANEL
-          // var buttonContainer = d3.select("#quiz-panel")
-          // .append("div")
-          // .attr("class", "button-container")
+      // // step 2: UNCOMMENT TO SEE NEXT STEP
 
+      // // get new filtered data based on step 1
 
-          // buttonContainer.selectAll("button")
-          // .data(neighborhoods_json.features)
-          // .enter()
-          // .append("button")
-          // .text(d => d.properties.Name)
-          // .on("click", selected);
+      // // hide other g tag after button is clicked
 
+      // stepOne.style("display", "none")
 
+      // // insert icons for each type of establishment
+      // // repeat process
 
+      // let stepTwo = quiz.append("g").attr("id", "step2")
+      // let estabContain = stepTwo.append("g").attr("transform", `translate(0, ${mapHeight/2})`)
 
+      // stepTwo.append("text")
+      //     .text("What type of establishment are you looking for?")
+      //     .attr("x", quizWidth / 2)
+      //     .attr("y", 30)
+      //     .attr("text-anchor", "middle")
+      //     .style("font-size", 24)
+
+      //   stepTwo.append("text")
+      //     .text("Select a type of establishment using the icons below:")
+      //     .attr("x", quizWidth / 2)
+      //     .attr("y", 55)
+      //     .attr("text-anchor", "middle")
+      //     .style("font-size", 16)
+      
+      // let estabList= new Set(restaurants.map(d => d.estab))
+      // console.log(estabList)
+      
+      // let estabs = estabContain.selectAll("text.estab")
+      //     .data(estabList)
+      //     .join("text")
+      //     .attr("class", "estab")
+      //     .text(d => d)
+      //     .attr("x", (d, i) => 100+i*100)
 
 
       }
