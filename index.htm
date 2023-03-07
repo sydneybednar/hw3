@@ -53,12 +53,12 @@
     <p> [Intro Here]
     </p>
     </div>
-    <svg id="map", width = "800", height = "800"></svg>
+    <svg id="map", width = "1200", height = "500"></svg>
     <script>
       const svg = d3.select("svg#map")
-      const mapWidth = svg.attr("width")
+      const margins = { top: 10, right: 50, bottom: 40, left: 50 };
+      const mapWidth = svg.attr("width")/2
       const mapHeight = svg.attr("height")
-      const margins = { top: 10, right: 10, bottom: 40, left: 50 };
 
       const requestData = async () => {
         let restaurants = await d3.csv('boston_yelp.csv', d3.autoType)
@@ -80,8 +80,6 @@
         var projection = d3.geoMercator().fitSize([mapWidth, mapHeight], neighborhoods_json)
 
         var path = d3.geoPath().projection(projection);
-
-        var map = svg.append("g").attr("class", "map");
        
 
 //       var neighborhoods = topojson.feature(ma, ma.objects.cb_2015_massachusetts_county_20m);
@@ -103,6 +101,8 @@
             .attr( "stroke", "#999")
             .attr("d", path);
 
+        
+        // label neighborhoods
 
         bostonRes.forEach( d => {
       
@@ -122,10 +122,11 @@
           .attr("cx", d => d.Position[0])
           .attr("cy", d => d.Position[1]);
         
+        // need to edit translate extent now that map is only half of svg
         var zoom = d3.zoom()
                   .scaleExtent([1,100])
-                  .translateExtent([[-50,-50],[mapWidth+50,mapHeight+50]])  // to lock to edges
-                  .on("zoom", mapZoomed);
+                  // .translateExtent([[-50,-50],[mapWidth+50,mapHeight+50]])  // to lock to edges
+                  .on("zoom", neighborhoodZoom);
 
         map.call(zoom);
 
@@ -165,7 +166,35 @@
           
 
         }
+
+        // quiz panel
+        var quiz = svg.append("g").attr("class", "quiz").attr("transform", `translate(${mapWidth}, 0)`)
+        var quizWidth = svg.attr("width") - mapWidth
+
+
+        // step one
+        let stepOne = quiz.append("g")
+
+        // add rect to see border -- can remove later
+        stepOne.append("rect")
+               .attr("width", quizWidth)
+               .attr("height", mapHeight)
+               .style("fill", "none")
+               .style("stroke", "black")
+               .style("stroke-width", 1)
+
+        stepOne.append("text")
+          .text("Welcome to Boston!")
+          .attr("x", quizWidth / 2)
+          .attr("y", 30)
+          .attr("text-anchor", "middle")
+          .style("font-size", 24)
+
+
         
+
+
+
       }
       requestData();
 
