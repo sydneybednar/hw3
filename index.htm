@@ -65,16 +65,19 @@
         
         console.log(restaurants)
 
-        const ma = await d3.json("ma.json");
+        let bostonRes = restaurants.filter(d => d.city === "Boston")
 
-        console.log(ma)
+        // const ma = await d3.json("ma.json");
 
-        const towns = await d3.json("cities.json");
+        // console.log(ma)
 
-        console.log(towns)
+        // const towns = await d3.json("cities.json");
 
+        // console.log(towns)
 
-        var projection = d3.geoMercator().fitSize([mapWidth, mapHeight], towns)
+        console.log(neighborhoods_json)
+
+        var projection = d3.geoMercator().fitSize([mapWidth, mapHeight], neighborhoods_json)
 
         var path = d3.geoPath().projection(projection);
 
@@ -90,18 +93,18 @@
 
         var map = svg.append("g").attr("class", "map");
 
-        map.selectAll("path")
-            .data(towns.features)
+        let neighborhoods = map.selectAll("path")
+            .data(neighborhoods_json.features)
             .enter()
             .append("path")
-            .attr("id", d => d.properties.town)
+            .attr("id", d => d.properties.name)
             .attr("class", "neighborhood")
             .style("fill", "white")
             .attr( "stroke", "#999")
             .attr("d", path);
 
 
-        restaurants.forEach( d => {
+        bostonRes.forEach( d => {
       
           d.Position = projection( [d.longitude, d.latitude] );
           
@@ -109,17 +112,59 @@
 
         console.log(restaurants[0])
         
-        // Draw circles using the Positions we just made
-        map.selectAll("circle").data(restaurants)
+
+        let circles = map.selectAll("circle").data(bostonRes)
           .join("circle")
           .attr("id", d => d.name)
-          .attr("r", 3)
+          .attr("r", 1.5)
           .attr("fill", "forestgreen")
           .attr("opacity", 1)
           .attr("cx", d => d.Position[0])
           .attr("cy", d => d.Position[1]);
         
+        var zoom = d3.zoom()
+                  .scaleExtent([1,100])
+                  .translateExtent([[-50,-50],[mapWidth+50,mapHeight+50]])  // to lock to edges
+                  .on("zoom", mapZoomed);
 
+        map.call(zoom);
+
+        map.call(zoom.transform, d3.zoomIdentity);
+
+        function neighborhoodZoom({transform}) {       
+
+          map.attr("transform", transform.toString() );
+
+        }
+
+        map.selectAll(".neighborhood").on("click", selected);
+        
+
+        function selected(event, d) {
+          //NOTE: this is Jeff's code, will change to original code, just wanted to test click and zoom
+          console.log(d)
+
+          let bounds = path.bounds(d.geometry); 
+          let dx = bounds[1][0] - bounds[0][0]; 
+          let dy = bounds[1][1] - bounds[0][1]; 
+          let x = (bounds[0][0] + bounds[1][0]) / 2; 
+          let y = (bounds[0][1] + bounds[1][1]) / 2; 
+
+          
+          let scale = Math.max(1, Math.min(10, 0.9 / Math.max( dx / mapWidth, 
+                                                              dy / mapHeight )));
+
+          let translate = [mapWidth / 2 - x * scale, mapHeight / 2 - y * scale];
+
+          let newTransform = d3.zoomIdentity
+                                .translate(translate[0],translate[1])
+                                .scale(scale);
+         
+          map.transition().duration(1000).call(zoom.transform, newTransform);
+
+          
+
+        }
         
       }
       requestData();
