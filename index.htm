@@ -425,6 +425,8 @@
           .style("font-size", 16)
 
       var cuisineSelections = new Array
+      var finalSelections = new Array 
+      var resInfo = new Array
 
           
       let cuis = cusContain.selectAll("text.cus")
@@ -456,13 +458,23 @@
 
             let resCircles = d3.selectAll("circle")
             resCircles.each( function() {        
-                d3.select(this)
-                .style("fill", d => {
-                    if(selections.includes(d['neighborhood']) && estSelections.includes(d['estab']) && (d['cuisine']).some(r => cuisineSelections.includes(r))){ return "blue"}
+                let selection = d3.select(this)
+                selection.style("fill", d => {
+                    if(selections.includes(d['neighborhood']) && estSelections.includes(d['estab']) && (d['cuisine']).some(r => cuisineSelections.includes(r))){ finalSelections.push(d); return "blue"}
                     else{ return "lightgrey"}
                     console.log(d['cuisine'])
+                    
                     })
                 })  
+            console.log(finalSelections)
+
+            
+
+            finalSelections.forEach(function(d) {
+              resInfo.push(d.name);
+            });
+
+            console.log(resInfo)
           })
         .on("mouseover", function () {
             d3.select(this).style("fill", "deeppink")
@@ -477,6 +489,7 @@
         })
 
       stepThree.style("display", "none")
+      console.log(finalSelections)
 
       stepThree.append("text")
                 .attr("x", mapWidth - 60)
@@ -485,6 +498,16 @@
                 .text("Next")
                 .on("click", function(){
                   stepThree.style("display", "none")
+                  stepFour.style("display", "")
+                  // stepFour.append("text")
+                  //         .attr("x", quizWidth / 2)
+                  //         .attr("y", 70)
+                  //         .text(function(d) { return selections.toString()})
+
+                  stepFour.append("text")
+                          .attr("x", 20)
+                          .attr("y", 70)
+                          .text(function(d) { return resInfo.toString()})
                 })
 
       stepThree.append("text")
@@ -496,6 +519,55 @@
                   stepTwo.style("display", "")
                   stepThree.style("display", "none")
                 })
+
+      // STEP FOUR
+
+      let stepFour = quiz.append("g").attr("id", "step4")
+
+      console.log(cuisineList)
+        
+
+      stepFour.append("text")
+          .text("These are your current restaurant matches")
+          .attr("x", quizWidth / 2)
+          .attr("y", 30)
+          .attr("text-anchor", "middle")
+          .style("font-size", 24)
+
+      stepFour.append("text")
+          .text("Your selections:")
+          .attr("x", quizWidth / 2)
+          .attr("y", 55)
+          .attr("text-anchor", "middle")
+          .style("font-size", 16)
+
+      // stepFour.append("text")
+      //     .text("Neighborhoods:")
+      //     .attr("x", quizWidth / 3)
+      //     .attr("y", 70)
+      //     .attr("text-anchor", "middle")
+      //     .style("font-size", 16)
+      
+      // stepFour.append("text")
+      //     .attr("x", quizWidth / 2)
+      //     .attr("y", 70)
+      //     .text(function(d) { return resInfo.toString()})
+
+      // console.log(selections)
+
+      // stepFour.append("text")
+      //     .text("Your selections:")
+      //     .attr("x", quizWidth / 2)
+      //     .attr("y", 55)
+      //     .attr("text-anchor", "middle")
+      //     .style("font-size", 16)
+
+    
+      stepFour.style("display", "none")
+
+          
+      
+
 
       }
       requestData();
