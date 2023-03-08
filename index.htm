@@ -71,54 +71,25 @@
 
         let bostonRes = restaurants.filter(d => d.city === "Boston")
 
-        // const ma = await d3.json("ma.json");
-
-        // console.log(ma)
-
-        // const towns = await d3.json("cities.json");
-
-        // console.log(towns)
-
         console.log(neighborhoods_json)
 
-        var projection = d3.geoMercator().fitSize([mapWidth, mapHeight], neighborhoods_json)
+        var projection = d3.geoMercator()
+                           .fitSize([mapWidth, mapHeight], neighborhoods_json)
 
         var path = d3.geoPath().projection(projection);
-       
 
-//       var neighborhoods = topojson.feature(ma, ma.objects.cb_2015_massachusetts_county_20m);
-
-
-//       var projection = d3.geoMercator().fitSize([mapWidth, mapHeight], neighborhoods)
-
-//       var path = d3.geoPath().projection(projection);
-
-        var map = svg.append("g").attr("class", "map");
+        var map = svg.append("g").attr("class", "map")
 
         let neighborhoods = map.selectAll("path")
             .data(neighborhoods_json.features)
             .enter()
             .append("path")
-            .attr("id", d => d.properties.name)
+            .attr("id", d => d.properties.Name)
             .attr("class", "neighborhood")
             .style("fill", "white")
             .attr( "stroke", "#999")
             .attr("d", path);
-
-      // let buttons = d3.select("#buttons")
-      //     .selectAll("button")
-      //     .data(neighborhoods_json.features)
-      //     .enter()
-      //     .append("button")
-      //     .text(d => d.properties.Name)
-      //     .on("click", selected)
-      //     .on("mouseover", function(d){
-      //       const neighborhood = d.properties.Name;
-      //   d3.select("#" + neighborhood)
-      //       .style("fill", "lightgray");
-      //     })
-
-         
+      
 
         //Adding the names to the neighborhoods
 
@@ -149,24 +120,26 @@
 
 
         neighborhoods.append("text")
-        .attr("class", "neighborhood-label")
-        .attr("transform", function(d) {
-          return "translate(" + path.centroid(d) + ")";
-        })
-        .attr("dy", ".35em")
-        .text(function(d) { return d.properties.Name; });
+                    .attr("class", "neighborhood-label")
+                    .attr("transform", function(d) {
+                      return "translate(" + path.centroid(d) + ")";
+                    })
+                    .attr("dy", ".35em")
+                    .text(function(d) { return d.properties.Name; });
+
+        console.log(bostonRes)
 
         let circles = map.selectAll("circle").data(bostonRes)
           .enter()
           .append("circle")
           .attr("id", d => d.name)
+          .attr("class", d => d.neighborhood)
           .attr("r", 1.5)
-          .attr("fill", "forestgreen")
-          .attr("opacity", 0.5)
+          .attr("fill", "lightgrey")
+          .attr("opacity", 0.8)
           .attr("cx", d => d.Position[0])
           .attr("cy", d => d.Position[1]);
         
-        // need to edit translate extent now that map is only half of svg
         var zoom = d3.zoom()
                   .scaleExtent([1,100])
                   .translateExtent([[-50, -50],[mapWidth+50,mapHeight+50]])  // to lock to edges
@@ -182,28 +155,28 @@
 
         }
 
-        map.selectAll(".neighborhood").on("click", selected);
+      map.selectAll(".neighborhood").on("click", selected);
 
-//Neighborhood names show up on hover on bottom left
-      // var tooltip = d3.select("body")
-      //   .append("div")
-      //   .attr("class", "tooltip")
-      //   .style("opacity", 0);
+      //Neighborhood names show up on hover on bottom left
+            // var tooltip = d3.select("body")
+            //   .append("div")
+            //   .attr("class", "tooltip")
+            //   .style("opacity", 0);
 
-      // d3.selectAll(".neighborhood")
-      //   .on("mouseover", function(event, d) {
-      //     tooltip.transition()
-      //       .duration(200)
-      //       .style("opacity", 0.9);
-      //     tooltip.html(d.properties.Name)
-      //       .style("left", (event.pageX + 10) + "px")
-      //       .style("top", (event.pageY - 30) + "px");
-      //   })
-      //   .on("mouseout", function(d) {
-      //     tooltip.transition()
-      //       .duration(500)
-      //       .style("opacity", 0);
-      //   });
+            // d3.selectAll(".neighborhood")
+            //   .on("mouseover", function(event, d) {
+            //     tooltip.transition()
+            //       .duration(200)
+            //       .style("opacity", 0.9);
+            //     tooltip.html(d.properties.Name)
+            //       .style("left", (event.pageX + 10) + "px")
+            //       .style("top", (event.pageY - 30) + "px");
+            //   })
+            //   .on("mouseout", function(d) {
+            //     tooltip.transition()
+            //       .duration(500)
+            //       .style("opacity", 0);
+            //   });
 
     
         function selected(event, d) {
@@ -256,62 +229,68 @@
 
         var selections = new Array
 
+        let neighbor = new Set(bostonRes.map(d => d.neighborhood))
+
         let buttons = buttonContain.selectAll("text.button")
-          .data(neighborhoods_json.features)
+          .data(neighbor)
           .join("text")
           .attr("class", "button")
-          .text(d => d.properties.Name)
+          .text(d => d)
           .attr("x", function(d,i){
-            if(i>12){return 400}
+            if(i>8){return 400}
             else{return 30}
           })
           .attr("dy", function(d,i){
-            if (i>12){
-              x=i-13
+            if (i>8){
+              x=i-9
               return `${x*2}em`
             }
             else{return `${i*2}em`}
           })
           .on("click", function(event, d){
             // first run zoom function
-            selected(event, d);
+            // selected(event, d);
+            d3.select(this).classed("clicked", true)
 
-            selections.push(d.properties.Name)
+            selections.push(d);
+            updateCircles();
 
           })
           .on("mouseover", function(){
             d3.select(this).style("fill", "deeppink")
           })
           .on("mouseout", function(e){
-            d3.select(this).style("fill", "black")
+            if(d3.select(this).attr("class")!="button clicked"){
+              d3.select(this).style("fill", "black")
+            }
+            else{
+              d3.select(this).style("font-weight", "bold")
+            }
           })
 
+      // update circles function
+      function updateCircles(){
+        var resCircles = d3.selectAll("circle")
+        resCircles.each(function () {
+          d3.select(this)
+            .style("fill", d => {
+              if (selections.includes(d['neighborhood'])) { return "blue" }
+              else { return "lightgrey" }
+            })
+        })  
+
+      };
+
+
       // create a next button? --> clicking this button will return a filtered dataframe for step 2
-         stepOne.append("text")
+      stepOne.append("text")
                 .attr("x", mapWidth - 60)
                 .attr("y", mapHeight - 20)
                 .style("font-weight", "bold")
                 .text("Next")
                 .on("click", function(){
                   stepOne.style("display", "none")
-                  stepTwo.style("display", "")
-
-                  console.log(selections)
-
-                  console.log(selections.includes('Downtown'))
-
-                  //circles.selectAll("circle").exit().remove()
-                  var resCircles = d3.selectAll("circle")
-                                                    
-                  resCircles.each( function() {
-                      // let currentCircle = d3.select(this)
-                      // console.log(currentCircle)
-                      d3.select(this)
-                      .style("fill", d => {
-                          if(selections.includes(d['neighborhood'])){ return "blue"}
-                          else{ return "lightgrey"}
-                          })
-                      })  
+                  stepTwo.style("display", "")  
                 })
 
       // // step 2: UNCOMMENT TO SEE NEXT STEP
@@ -361,8 +340,30 @@
           .text(d => d)
           .attr("x", (d, i) => 100+i*100)
           .on("click", function(event, d){
-            d3.select(this).style("fill", "deeppink")
+
+            d3.select(this).classed("clicked", true)
+
             estSelections.push(d)
+
+            var resCircles = d3.selectAll("circle")
+            resCircles.each(function () {
+              d3.select(this)
+                .style("fill", d => {
+                  if (selections.includes(d['neighborhood']) && estSelections.includes(d['estab'])) { return "blue" }
+                  else { return "lightgrey" }
+                })
+            })  
+          })
+          .on("mouseover", function () {
+            d3.select(this).style("fill", "deeppink")
+          })
+          .on("mouseout", function (e) {
+            if (d3.select(this).attr("class") != "estab clicked") {
+              d3.select(this).style("fill", "black")
+            }
+            else {
+              d3.select(this).style("font-weight", "bold")
+            }
           })
 
       stepTwo.append("text")
@@ -373,19 +374,6 @@
                 .on("click", function(){
                   stepTwo.style("display", "none")
                   stepThree.style("display", "")
-
-                  console.log(estSelections)
-
-                  let resCircles = d3.selectAll("circle")
-                  resCircles.each( function() {
-                      // let currentCircle = d3.select(this)
-                      // console.log(currentCircle)
-                      d3.select(this)
-                      .style("fill", d => {
-                          if(selections.includes(d['neighborhood']) && estSelections.includes(d['estab'])){ return "blue"}
-                          else{ return "lightgrey"}
-                          })
-                      })  
                 })
 
       stepTwo.append("text")
@@ -439,27 +427,39 @@
               return `${x*2}em`}
           })
           .on("click", function(element){
+            d3.select(this).classed("clicked", true)
 
-                  let resCircles = d3.selectAll("circle")
-                  resCircles.each( function() {
-                      
-                      d3.select(this)
-                      .style("fill", d => {
-                          if(selections.includes(d['neighborhood']) && estSelections.includes(d['estab']) && d['cuisine'] === element){ return "blue"}
-                          else{ return "lightgrey"}
-                          })
-                      })  })
+            let resCircles = d3.selectAll("circle")
+            resCircles.each( function() {        
+                d3.select(this)
+                .style("fill", d => {
+                    if(selections.includes(d['neighborhood']) && estSelections.includes(d['estab']) && d['cuisine'] === element){ return "blue"}
+                    else{ return "lightgrey"}
+                    })
+                })  
+          })
+        .on("mouseover", function () {
+            d3.select(this).style("fill", "deeppink")
+        })
+        .on("mouseout", function (e) {
+            if (d3.select(this).attr("class") != "cus clicked") {
+              d3.select(this).style("fill", "black")
+            }
+            else {
+              d3.select(this).style("font-weight", "bold")
+            }
+        })
 
       stepThree.style("display", "none")
 
-      // stepThree.append("text")
-      //           .attr("x", mapWidth - 60)
-      //           .attr("y", mapHeight - 20)
-      //           .style("font-weight", "bold")
-      //           .text("Next")
-      //           .on("click", function(){
-      //             stepThree.style("display", "none")
-      //           })
+      stepThree.append("text")
+                .attr("x", mapWidth - 60)
+                .attr("y", mapHeight - 20)
+                .style("font-weight", "bold")
+                .text("Next")
+                .on("click", function(){
+                  stepThree.style("display", "none")
+                })
 
       stepThree.append("text")
                 .attr("x", 20)
