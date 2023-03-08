@@ -157,7 +157,8 @@
         .text(function(d) { return d.properties.Name; });
 
         let circles = map.selectAll("circle").data(bostonRes)
-          .join("circle")
+          .enter()
+          .append("circle")
           .attr("id", d => d.name)
           .attr("r", 1.5)
           .attr("fill", "forestgreen")
@@ -253,6 +254,8 @@
 
         let buttonContain = stepOne.append("g").attr("transform", `translate(0, ${mapHeight-420})`)
 
+        var selections = new Array
+
         let buttons = buttonContain.selectAll("text.button")
           .data(neighborhoods_json.features)
           .join("text")
@@ -272,6 +275,9 @@
           .on("click", function(event, d){
             // first run zoom function
             selected(event, d);
+
+            selections.push(d.properties.Name)
+
           })
           .on("mouseover", function(){
             d3.select(this).style("fill", "deeppink")
@@ -289,6 +295,23 @@
                 .on("click", function(){
                   stepOne.style("display", "none")
                   stepTwo.style("display", "")
+
+                  console.log(selections)
+
+                  console.log(selections.includes('Downtown'))
+
+                  //circles.selectAll("circle").exit().remove()
+                  var resCircles = d3.selectAll("circle")
+                                                    
+                  resCircles.each( function() {
+                      // let currentCircle = d3.select(this)
+                      // console.log(currentCircle)
+                      d3.select(this)
+                      .style("fill", d => {
+                          if(selections.includes(d['neighborhood'])){ return "blue"}
+                          else{ return "lightgrey"}
+                          })
+                      })  
                 })
 
       // // step 2: UNCOMMENT TO SEE NEXT STEP
@@ -329,12 +352,18 @@
       const cuisines = await d3.csv('cuisines.csv')
       console.log(cuisines)
       
+      var estSelections = new Array
+
       let estabs = estabContain.selectAll("text.estab")
           .data(estabList)
           .join("text")
           .attr("class", "estab")
           .text(d => d)
           .attr("x", (d, i) => 100+i*100)
+          .on("click", function(event, d){
+            d3.select(this).style("fill", "deeppink")
+            estSelections.push(d)
+          })
 
       stepTwo.append("text")
                 .attr("x", mapWidth - 60)
@@ -344,6 +373,19 @@
                 .on("click", function(){
                   stepTwo.style("display", "none")
                   stepThree.style("display", "")
+
+                  console.log(estSelections)
+
+                  let resCircles = d3.selectAll("circle")
+                  resCircles.each( function() {
+                      // let currentCircle = d3.select(this)
+                      // console.log(currentCircle)
+                      d3.select(this)
+                      .style("fill", d => {
+                          if(selections.includes(d['neighborhood']) && estSelections.includes(d['estab'])){ return "blue"}
+                          else{ return "lightgrey"}
+                          })
+                      })  
                 })
 
       stepTwo.append("text")
@@ -396,6 +438,17 @@
               x=i-4
               return `${x*2}em`}
           })
+          .on("click", function(element){
+
+                  let resCircles = d3.selectAll("circle")
+                  resCircles.each( function() {
+                      
+                      d3.select(this)
+                      .style("fill", d => {
+                          if(selections.includes(d['neighborhood']) && estSelections.includes(d['estab']) && d['cuisine'] === element){ return "blue"}
+                          else{ return "lightgrey"}
+                          })
+                      })  })
 
       stepThree.style("display", "none")
 
@@ -406,7 +459,6 @@
       //           .text("Next")
       //           .on("click", function(){
       //             stepThree.style("display", "none")
-      //             //stepTwo.style("display", "")
       //           })
 
       stepThree.append("text")
