@@ -68,8 +68,21 @@
         let restaurants = await d3.csv('boston_yelp.csv', d3.autoType)
         
         console.log(restaurants)
+      
 
         let bostonRes = restaurants.filter(d => d.city === "Boston")
+       
+       //formatting the cuisine attribute
+        bostonRes.forEach(function(d) {
+        d.cuisine = JSON.parse(d.cuisine.replace(/'/g, '"'));
+      });
+
+        // bostonRes.forEach(function(d) {
+        //   d.cuisine = JSON.parse(d.cuisine);
+        // });
+
+      
+        console.log(bostonRes[0].cuisine);
 
         console.log(neighborhoods_json)
 
@@ -344,6 +357,7 @@
             d3.select(this).classed("clicked", true)
 
             estSelections.push(d)
+            console.log(estSelections)
 
             var resCircles = d3.selectAll("circle")
             resCircles.each(function () {
@@ -385,13 +399,16 @@
                   stepOne.style("display", "")
                   stepTwo.style("display", "none")
                 })
-
-
+                
+                
       // STEP THREE 
       let stepThree = quiz.append("g").attr("id", "step3")
 
       
       let cusContain = stepThree.append("g").attr("transform", `translate(0, ${mapHeight/2})`)
+      let cuisineList = [ 'american', 'breakfast', 'mexican', 'japanese', 'vietnamese', 'italian', 'seafood', 'mediterranean', 'sandwich', 'healthy', 'spanish', 'asian_fusion', 'indian_pakistani', 'french', 'chinese', 'latin', 'thai', 'middle_east', 'polish_ukr' ]
+
+      console.log(cuisineList)
 
       stepThree.append("text")
           .text("What type of cuisine are you looking for?")
@@ -407,12 +424,14 @@
           .attr("text-anchor", "middle")
           .style("font-size", 16)
 
+      var cuisineSelections = new Array
 
+          
       let cuis = cusContain.selectAll("text.cus")
-          .data(cuisines)
+          .data(cuisineList)
           .join("text")
           .attr("class", "cus")
-          .text(d => d.cuisine)
+          .text(d => d)
           .attr("x", function(d,i){
             if(i>9){return 400}
             else{return 30}
@@ -426,15 +445,22 @@
               x=i-4
               return `${x*2}em`}
           })
-          .on("click", function(element){
+          .on("click", function(event, d){
             d3.select(this).classed("clicked", true)
+
+            cuisineSelections.push(d) 
+
+            console.log(cuisineSelections)
+           
+
 
             let resCircles = d3.selectAll("circle")
             resCircles.each( function() {        
                 d3.select(this)
                 .style("fill", d => {
-                    if(selections.includes(d['neighborhood']) && estSelections.includes(d['estab']) && d['cuisine'] === element){ return "blue"}
+                    if(selections.includes(d['neighborhood']) && estSelections.includes(d['estab']) && (d['cuisine']).some(r => cuisineSelections.includes(r))){ return "blue"}
                     else{ return "lightgrey"}
+                    console.log(d['cuisine'])
                     })
                 })  
           })
