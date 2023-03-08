@@ -251,7 +251,7 @@
           .attr("text-anchor", "middle")
           .style("font-size", 16)
 
-        let buttonContain = stepOne.append("g").attr("transform", `translate(0, ${mapHeight-410})`)
+        let buttonContain = stepOne.append("g").attr("transform", `translate(0, ${mapHeight-420})`)
 
         let buttons = buttonContain.selectAll("text.button")
           .data(neighborhoods_json.features)
@@ -281,7 +281,15 @@
           })
 
       // create a next button? --> clicking this button will return a filtered dataframe for step 2
-
+         stepOne.append("text")
+                .attr("x", mapWidth - 60)
+                .attr("y", mapHeight - 20)
+                .style("font-weight", "bold")
+                .text("Next")
+                .on("click", function(){
+                  stepOne.style("display", "none")
+                  stepTwo.style("display", "")
+                })
 
       // // step 2: UNCOMMENT TO SEE NEXT STEP
 
@@ -294,33 +302,122 @@
       // // insert icons for each type of establishment
       // // repeat process
 
-      // let stepTwo = quiz.append("g").attr("id", "step2")
-      // let estabContain = stepTwo.append("g").attr("transform", `translate(0, ${mapHeight/2})`)
+      let stepTwo = quiz.append("g").attr("id", "step2")
 
-      // stepTwo.append("text")
-      //     .text("What type of establishment are you looking for?")
-      //     .attr("x", quizWidth / 2)
-      //     .attr("y", 30)
-      //     .attr("text-anchor", "middle")
-      //     .style("font-size", 24)
-
-      //   stepTwo.append("text")
-      //     .text("Select a type of establishment using the icons below:")
-      //     .attr("x", quizWidth / 2)
-      //     .attr("y", 55)
-      //     .attr("text-anchor", "middle")
-      //     .style("font-size", 16)
       
-      // let estabList= new Set(restaurants.map(d => d.estab))
-      // console.log(estabList)
-      
-      // let estabs = estabContain.selectAll("text.estab")
-      //     .data(estabList)
-      //     .join("text")
-      //     .attr("class", "estab")
-      //     .text(d => d)
-      //     .attr("x", (d, i) => 100+i*100)
+      let estabContain = stepTwo.append("g").attr("transform", `translate(0, ${mapHeight/2})`)
 
+      stepTwo.append("text")
+          .text("What type of establishment are you looking for?")
+          .attr("x", quizWidth / 2)
+          .attr("y", 30)
+          .attr("text-anchor", "middle")
+          .style("font-size", 24)
+
+        stepTwo.append("text")
+          .text("Select a type of establishment using the icons below:")
+          .attr("x", quizWidth / 2)
+          .attr("y", 55)
+          .attr("text-anchor", "middle")
+          .style("font-size", 16)
+
+        stepTwo.style("display", "none")
+      
+      let estabList= new Set(restaurants.map(d => d.estab))
+      console.log(estabList)
+
+      const cuisines = await d3.csv('cuisines.csv')
+      console.log(cuisines)
+      
+      let estabs = estabContain.selectAll("text.estab")
+          .data(estabList)
+          .join("text")
+          .attr("class", "estab")
+          .text(d => d)
+          .attr("x", (d, i) => 100+i*100)
+
+      stepTwo.append("text")
+                .attr("x", mapWidth - 60)
+                .attr("y", mapHeight - 20)
+                .style("font-weight", "bold")
+                .text("Next")
+                .on("click", function(){
+                  stepTwo.style("display", "none")
+                  stepThree.style("display", "")
+                })
+
+      stepTwo.append("text")
+                .attr("x", 20)
+                .attr("y", mapHeight - 20)
+                .style("font-weight", "bold")
+                .text("Back")
+                .on("click", function(){
+                  stepOne.style("display", "")
+                  stepTwo.style("display", "none")
+                })
+
+
+      // STEP THREE 
+      let stepThree = quiz.append("g").attr("id", "step3")
+
+      
+      let cusContain = stepThree.append("g").attr("transform", `translate(0, ${mapHeight/2})`)
+
+      stepThree.append("text")
+          .text("What type of cuisine are you looking for?")
+          .attr("x", quizWidth / 2)
+          .attr("y", 30)
+          .attr("text-anchor", "middle")
+          .style("font-size", 24)
+
+      stepThree.append("text")
+          .text("Select a type of cuisine using the icons below:")
+          .attr("x", quizWidth / 2)
+          .attr("y", 55)
+          .attr("text-anchor", "middle")
+          .style("font-size", 16)
+
+
+      let cuis = cusContain.selectAll("text.cus")
+          .data(cuisines)
+          .join("text")
+          .attr("class", "cus")
+          .text(d => d.cuisine)
+          .attr("x", function(d,i){
+            if(i>9){return 400}
+            else{return 30}
+          })
+          .attr("y", function(d,i){
+            if (i>9){
+              x=i-14
+              return `${x*2}em`
+            }
+            else{
+              x=i-4
+              return `${x*2}em`}
+          })
+
+      stepThree.style("display", "none")
+
+      // stepThree.append("text")
+      //           .attr("x", mapWidth - 60)
+      //           .attr("y", mapHeight - 20)
+      //           .style("font-weight", "bold")
+      //           .text("Next")
+      //           .on("click", function(){
+      //             stepThree.style("display", "none")
+      //             //stepTwo.style("display", "")
+      //           })
+
+      stepThree.append("text")
+                .attr("x", 20)
+                .attr("y", mapHeight - 20)
+                .style("font-weight", "bold")
+                .text("Back")
+                .on("click", function(){
+                  stepTwo.style("display", "")
+                  stepThree.style("display", "none")
+                })
 
       }
       requestData();
