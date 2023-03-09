@@ -36,8 +36,23 @@
             font-weight: lighter;
         }
 
+        div.title{
+          width: 1500px;
+          line-height: 1em;
+          padding-left: 2em;
+          padding-top: 1em;
+          padding-bottom: 1em;
+          margin-bottom: 2em;
+        }
+
         div#container{
           display: flex;
+        }
+
+        div#quiz{
+          background-color: white;
+          margin-left: 2em;
+          padding: 1em;
         }
 
         p{
@@ -62,7 +77,7 @@
     <div class="title">
     <h1>Find your restaurant matches!</h1>
     
-    <p> Take our quiz to discover new restaurants in Boston! Keep an eye on the map to see
+    <p> Take our quiz to discover food and drink places all over Boston! Keep an eye on the map to see
       your matches update.
     </p>
     </div>
@@ -71,7 +86,7 @@
     <div> -->
     <div id="container">
     <svg id="map", width = "800", height = "700"></svg>
-    <div id ="quiz", width = "800", height = "700",style="border: 1px solid black"></div>
+    <div id ="quiz", width = "800", height = "600",style="border: 1px solid black"></div>
     </div>
     <!-- <svg id="quiz", width="600", height="500", style="border: 1px solid black"></svg> -->
     <script>
@@ -548,25 +563,10 @@
                           .enter()
                           .append("text")
                           .attr("class", "res-info")
-                          .attr("x", 20)
-                          .attr("y", function(d,i){return 80 + i*30;})
+                          .attr("x", 50)
+                          .attr("y", function(d,i){return 180 + i*30;})
                           .text(function(d, i){if (i <= 10) return d;}); 
-                  
-                  // let resCircles = d3.selectAll("circle")
-
-                  // console.log(resInfo)
-
-                  // resCircles.each(function (element) {
-                  //   if(resInfo.includes(d3.select(this).attr("id"))) {
-                  //     d3.select(this).style("fill", "deeppink")
-                  //   }
-                  //   else{
-                  //     d3.select(this).style("fill", "lightgrey")
-                  //   }
-
-                  // })
-                          
-                  
+                
                           
                   results.on("click", function(event, d){
                     
@@ -576,6 +576,7 @@
                       d3.select(this).classed("clicked", false)
                         .style("font-weight", "normal")
                         .attr("fill", "black");
+                      
 
                       } else {
                         resSelections.push(d);
@@ -605,11 +606,15 @@
                       });
 
                 })
+                .on("mouseover", function () {
+                      d3.select(this).style("fill", "deeppink")
+                    })
                 .on("mouseout", function (e) {
-                  if (d3.select(this).attr("class") != "estab clicked") {
+                  if (d3.select(this).attr("class") != "res-info clicked") {
                     d3.select(this).style("fill", "black")
                   }
                   else {
+                    d3.select(this).style("fill", "deeppink")
                     d3.select(this).style("font-weight", "bold")
                   }
                 })
@@ -635,9 +640,16 @@
       stepFour.append("text")
           .text("These are your best matches!")
           .attr("x", quizWidth / 2)
-          .attr("y", 30)
+          .attr("y", 40)
           .attr("text-anchor", "middle")
           .style("font-size", 24)
+
+      stepFour.append("text")
+          .text("Select a restaurant below to see it on the map")
+          .attr("x", quizWidth / 2)
+          .attr("y", 80)
+          .attr("text-anchor", "middle")
+          .style("font-size", 16)
 
 
       // RESTART BUTTON
