@@ -494,7 +494,7 @@
 
                             if(!finalSelections.includes(d)){
                               finalSelections.push(d);
-                              resInfo.push(d.name);
+        
                             }
                             return "blue"}
                         else{ return "lightgrey"}
@@ -506,8 +506,18 @@
                       (d['cuisine']).some(r => cuisineSelections.includes(r))) {return 1}
                     else{return 0.6}
                   })
-            })  
-            console.log(resInfo)
+            });
+            
+            
+            finalSelections.sort(function(a,b) {
+              return b.rating - a.rating;
+            });
+
+            resInfo = finalSelections.map(function(d){
+              return d.name + ", Rating: " + d.rating;
+
+            });
+            console.log(finalSelections)
           })
         .on("mouseover", function () {
             d3.select(this).style("fill", "deeppink")
@@ -537,9 +547,9 @@
                   //         .text(function(d) { return selections.toString()})
 
                   stepFour.append("text")
-                          .attr("x", 20)
-                          .attr("y", 70)
-                          .text(function(d) { return resInfo.toString()})
+                          .attr("x", 30)
+                          .attr("y", 90)
+                          .text(resInfo.join("\n"));
                 })
 
       stepThree.append("text")
@@ -570,6 +580,15 @@
           .attr("y", 55)
           .attr("text-anchor", "middle")
           .style("font-size", 16)
+
+      stepFour.selectAll(".res-info")
+      .data(resInfo)
+      .enter()
+      .append("text")
+      .attr("class", "res-info")
+      .attr("x", 20)
+      .attr("y", function(d,i){return 80 + i*20;})
+      .text(function(d){return d;});
 
       stepFour.append("text")
           .attr("x", 20)
