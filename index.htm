@@ -38,6 +38,11 @@
           overflow-y: auto;
         }
 
+
+        div#container{
+          display: flex;
+        }
+
        
     </style>
 
@@ -62,8 +67,10 @@
 
     <!-- <div id="buttons"></div>
     <div> -->
+    <div id="container">
     <svg id="map", width = "600", height = "500"></svg>
     <div id ="quiz", width = "600", height = "500",style="border: 1px solid black"></div>
+    </div>
     <!-- <svg id="quiz", width="600", height="500", style="border: 1px solid black"></svg> -->
     <script>
       const svg = d3.select("svg#map")
@@ -172,7 +179,7 @@
         // quiz panel
         var quizDiv = d3.select("div#quiz")
         // let svg2 = d3.select("svg#quiz")
-        var svg2 = quizDiv.append("svg").attr("class", "quiz").attr("width", 610).attr("height", 510)
+        var svg2 = quizDiv.append("svg").attr("class", "quiz").attr("width", 610).attr("height", 1500)
         var quiz = svg2.append("g").attr("class", "quiz")
         // .attr("transform", `translate(0, ${quizHeight-400})`)
         var quizWidth = quizDiv.attr("width")
@@ -274,8 +281,8 @@
 
       // NEXT BUTTON
       stepOne.append("text")
-                .attr("x", quizWidth - 40)
-                .attr("y", 500)
+                .attr("x", quizWidth - 60)
+                .attr("y", mapHeight-20)
                 .style("font-weight", "bold")
                 .text("Next")
                 .on("click", function(){
@@ -286,6 +293,18 @@
                   stepOne.style("display", "none")
                   stepTwo.style("display", "")  
                 })
+
+      // RESTART BUTTON
+        stepOne.append("text")
+          .attr("x", 20)
+          .attr("y", mapHeight - 20)
+          .text("Restart Quiz")
+          .style("fill", "red")
+          .on("click", function () {
+            d3.selectAll("circle").style("fill", "lightgrey").style("opacity", 0.6)
+            d3.selectAll("text.button").style("fill", "black").style("font-weight", "normal")
+            stepOne.style("display", "")
+          })
 
 
       // step two
@@ -375,8 +394,8 @@
 
       // NEXT BUTTON
       stepTwo.append("text")
-                .attr("x", quizWidth - 50)
-                .attr("y", 500)
+                .attr("x", quizWidth - 60)
+                .attr("y", mapHeight - 20)
                 .style("font-weight", "bold")
                 .text("Next")
                 .on("click", function(){
@@ -542,11 +561,16 @@
       
 
       stepThree.append("text")
-                .attr("x", quizWidth - 50)
-                .attr("y", 500)
+                .attr("x", quizWidth - 100)
+                .attr("y", mapHeight - 20 )
                 .style("font-weight", "bold")
                 .text("See Results")
                 .on("click", function(){
+                  if (finalSelections.length == 0) {
+                    finalSelections = bostonRes.filter(function (d) {
+                      return selections.includes(d.neighborhood) && estSelections.includes(d.estab);
+                    })
+                  }
                   finalSelections.sort(function(a,b) {
                     return b.rating - a.rating;
                   });
@@ -620,7 +644,7 @@
       // RESTART BUTTON
       stepFour.append("text")
           .attr("x", 20)
-          .attr("y", mapHeight - 20)
+          .attr("y", svg2.attr("height") - 20)
           .style("fill", "red")
           .text("Restart Quiz")
           .on("click", function () {
