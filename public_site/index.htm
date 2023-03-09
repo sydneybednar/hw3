@@ -36,14 +36,6 @@
             font-weight: lighter;
         }
 
-        div#quiz{
-          width: 600;
-          height: 500;
-          /* overflow-y: auto; */
-          padding-left: 150;
-        }
-
-
         div#container{
           display: flex;
         }
@@ -546,8 +538,7 @@
                     return d.name + ", Rating: " + d.rating;
 
                   });
-                  console.log(finalSelections)
-                  console.log(resInfo)
+  
                   d3.selectAll("text.cus").style("fill", "black").style("font-weight", "normal")
 
                   stepThree.style("display", "none")
@@ -559,7 +550,22 @@
                           .attr("class", "res-info")
                           .attr("x", 20)
                           .attr("y", function(d,i){return 80 + i*30;})
-                          .text(function(d, i){if (i <= 10) return d;});  
+                          .text(function(d, i){if (i <= 10) return d;}); 
+                  
+                  // let resCircles = d3.selectAll("circle")
+
+                  // console.log(resInfo)
+
+                  // resCircles.each(function (element) {
+                  //   if(resInfo.includes(d3.select(this).attr("id"))) {
+                  //     d3.select(this).style("fill", "deeppink")
+                  //   }
+                  //   else{
+                  //     d3.select(this).style("fill", "lightgrey")
+                  //   }
+
+                  // })
+                          
                   
                           
                   results.on("click", function(event, d){
@@ -581,6 +587,7 @@
                 
       
                       let resCircles = d3.selectAll("circle")
+                      
                       resCircles.each( function(element) {        
                           let selection = d3.select(this)
                           selection.style("fill",function(element){
