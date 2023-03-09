@@ -65,9 +65,9 @@
       const mapHeight = svg.attr("height")
 
       const requestData = async () => {
-        let restaurants = await d3.csv('boston_yelp.csv', d3.autoType)
+        let restaurants = await d3.csv('boston_yelp_final.csv', d3.autoType)
         
-        console.log(restaurants)
+        console.log(restaurants);
       
 
         let bostonRes = restaurants.filter(d => d.city === "Boston")
@@ -149,7 +149,7 @@
           .attr("class", d => d.neighborhood)
           .attr("r", 1.5)
           .attr("fill", "lightgrey")
-          .attr("opacity", 0.8)
+          .attr("opacity", 0.6)
           .attr("cx", d => d.Position[0])
           .attr("cy", d => d.Position[1]);
         
@@ -238,7 +238,7 @@
           .attr("text-anchor", "middle")
           .style("font-size", 16)
 
-        let buttonContain = stepOne.append("g").attr("transform", `translate(0, ${mapHeight-420})`)
+        let buttonContain = stepOne.append("g").attr("transform", `translate(0, ${mapHeight-410})`)
 
         var selections = new Array
 
@@ -251,7 +251,7 @@
           .text(d => d)
           .attr("x", function(d,i){
             if(i>8){return 400}
-            else{return 30}
+            else{return 40}
           })
           .attr("dy", function(d,i){
             if (i>8){
@@ -290,6 +290,10 @@
               if (selections.includes(d['neighborhood'])) { return "blue" }
               else { return "lightgrey" }
             })
+            .style("opacity", d => {
+              if (selections.includes(d['neighborhood'])) { return 1 }
+              else { return 0.6 }
+            })
         })  
 
       };
@@ -306,20 +310,11 @@
                   stepTwo.style("display", "")  
                 })
 
-      // // step 2: UNCOMMENT TO SEE NEXT STEP
-
-      // // get new filtered data based on step 1
-
-      // // hide other g tag after button is clicked
-
-      // stepOne.style("display", "none")
-
-      // // insert icons for each type of establishment
-      // // repeat process
-
-      let stepTwo = quiz.append("g").attr("id", "step2")
 
       
+
+      let stepTwo = quiz.append("g").attr("id", "step2")
+ 
       let estabContain = stepTwo.append("g").attr("transform", `translate(0, ${mapHeight/2})`)
 
       stepTwo.append("text")
@@ -356,8 +351,7 @@
 
             d3.select(this).classed("clicked", true)
 
-            estSelections.push(d)
-            console.log(estSelections)
+            estSelections.push(d);
 
             var resCircles = d3.selectAll("circle")
             resCircles.each(function () {
@@ -365,6 +359,10 @@
                 .style("fill", d => {
                   if (selections.includes(d['neighborhood']) && estSelections.includes(d['estab'])) { return "blue" }
                   else { return "lightgrey" }
+                })
+                .style("opacity", d => {
+                  if (selections.includes(d['neighborhood']) && estSelections.includes(d['estab'])) { return 1 }
+                  else { return 0.6 }
                 })
             })  
           })
@@ -380,14 +378,28 @@
             }
           })
 
+      estabContain.selectAll("image").data(estabList)
+        .join("image")
+        .attr("x",(d,i) => 110+100*i)
+        .attr("y", estabs.attr("y")-60)
+        .attr('width', 40)
+        .attr('height', 40)
+        .attr("xlink:href", d => `icons/estab/${d.replace("/", ":")}.png`)
+
       stepTwo.append("text")
                 .attr("x", mapWidth - 60)
                 .attr("y", mapHeight - 20)
                 .style("font-weight", "bold")
                 .text("Next")
                 .on("click", function(){
+                  // skip last step if just selected coffee/cafe
+                  // if(estSelections[0]==='coffee/cafe' && estSelections.length===1){
+                  //   stepTwo.style("display", "none")
+                  //   stepFour.style("display", "")
+                  // }
                   stepTwo.style("display", "none")
                   stepThree.style("display", "")
+                  
                 })
 
       stepTwo.append("text")
@@ -406,7 +418,9 @@
 
       
       let cusContain = stepThree.append("g").attr("transform", `translate(0, ${mapHeight/2})`)
-      let cuisineList = [ 'american', 'breakfast', 'mexican', 'japanese', 'vietnamese', 'italian', 'seafood', 'mediterranean', 'sandwich', 'healthy', 'spanish', 'asian_fusion', 'indian_pakistani', 'french', 'chinese', 'latin', 'thai', 'middle_east', 'polish_ukr' ]
+      let cuisineList = [ 'american', 'breakfast', 'mexican', 'japanese', 'vietnamese', 'italian', 
+      'seafood', 'mediterranean', 'sandwich', 'healthy', 'spanish', 'asian_fusion', 'indian_pakistani', 
+      'french', 'chinese', 'latin', 'thai', 'middle_east', 'polish_ukr']
 
       console.log(cuisineList)
 
@@ -450,30 +464,31 @@
           .on("click", function(event, d){
             d3.select(this).classed("clicked", true)
 
-            cuisineSelections.push(d) 
-
-            console.log(cuisineSelections)
-           
-
+            cuisineSelections.push(d)
 
             let resCircles = d3.selectAll("circle")
             resCircles.each( function() {        
                 let selection = d3.select(this)
-                selection.style("fill", d => {
-                    if(selections.includes(d['neighborhood']) && estSelections.includes(d['estab']) && (d['cuisine']).some(r => cuisineSelections.includes(r))){ finalSelections.push(d); return "blue"}
-                    else{ return "lightgrey"}
-                    console.log(d['cuisine'])
+                selection.style("fill",function(d){
+                        if(selections.includes(d['neighborhood']) && 
+                          estSelections.includes(d['estab']) && 
+                          (d['cuisine']).some(r => cuisineSelections.includes(r))){ 
+
+                            if(!finalSelections.includes(d)){
+                              finalSelections.push(d);
+                              resInfo.push(d.name);
+                            }
+                            return "blue"}
+                        else{ return "lightgrey"}
                     
-                    })
-                })  
-            console.log(finalSelections)
-
-            
-
-            finalSelections.forEach(function(d) {
-              resInfo.push(d.name);
-            });
-
+                        })
+                  .style("opacity", function (d) {
+                    if (selections.includes(d['neighborhood']) &&
+                      estSelections.includes(d['estab']) &&
+                      (d['cuisine']).some(r => cuisineSelections.includes(r))) {return 1}
+                    else{return 0.6}
+                  })
+            })  
             console.log(resInfo)
           })
         .on("mouseover", function () {
@@ -489,7 +504,6 @@
         })
 
       stepThree.style("display", "none")
-      console.log(finalSelections)
 
       stepThree.append("text")
                 .attr("x", mapWidth - 60)
@@ -523,8 +537,6 @@
       // STEP FOUR
 
       let stepFour = quiz.append("g").attr("id", "step4")
-
-      console.log(cuisineList)
         
 
       stepFour.append("text")
@@ -540,6 +552,16 @@
           .attr("y", 55)
           .attr("text-anchor", "middle")
           .style("font-size", 16)
+
+      stepFour.append("text")
+          .attr("x", 20)
+          .attr("y", mapHeight - 20)
+          .style("font-weight", "bold")
+          .text("Back")
+          .on("click", function () {
+            stepFour.style("display", "none")
+            stepThree.style("display", "")
+          })
 
       // stepFour.append("text")
       //     .text("Neighborhoods:")
@@ -564,10 +586,6 @@
 
     
       stepFour.style("display", "none")
-
-          
-      
-
 
       }
       requestData();
