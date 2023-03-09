@@ -32,6 +32,12 @@
             font-weight: lighter;
         }
 
+        div#quiz{
+          width: 600;
+          height: 500;
+          overflow-y: auto;
+        }
+
        
     </style>
 
@@ -57,7 +63,8 @@
     <!-- <div id="buttons"></div>
     <div> -->
     <svg id="map", width = "600", height = "500"></svg>
-    <svg id="quiz", width="600", height="500", style="border: 1px solid black"></svg>
+    <div id ="quiz", width = "600", height = "500",style="border: 1px solid black"></div>
+    <!-- <svg id="quiz", width="600", height="500", style="border: 1px solid black"></svg> -->
     <script>
       const svg = d3.select("svg#map")
       const margins = { top: 10, right: 50, bottom: 40, left: 50 };
@@ -163,9 +170,14 @@
         // }
 
         // quiz panel
-        let svg2 = d3.select("svg#quiz")
+        var quizDiv = d3.select("div#quiz")
+        // let svg2 = d3.select("svg#quiz")
+        var svg2 = quizDiv.append("svg").attr("class", "quiz").attr("width", 610).attr("height", 510)
         var quiz = svg2.append("g").attr("class", "quiz")
-        var quizWidth = svg2.attr("width")
+        // .attr("transform", `translate(0, ${quizHeight-400})`)
+        var quizWidth = quizDiv.attr("width")
+        var quizHeight = quizDiv.attr("height")
+        console.log(quizWidth)
 
         // step one
         let stepOne = quiz.append("g")
@@ -262,8 +274,8 @@
 
       // NEXT BUTTON
       stepOne.append("text")
-                .attr("x", mapWidth - 60)
-                .attr("y", mapHeight - 20)
+                .attr("x", quizWidth - 40)
+                .attr("y", 500)
                 .style("font-weight", "bold")
                 .text("Next")
                 .on("click", function(){
@@ -363,8 +375,8 @@
 
       // NEXT BUTTON
       stepTwo.append("text")
-                .attr("x", mapWidth - 60)
-                .attr("y", mapHeight - 20)
+                .attr("x", quizWidth - 50)
+                .attr("y", 500)
                 .style("font-weight", "bold")
                 .text("Next")
                 .on("click", function(){
@@ -482,15 +494,15 @@
             });
             
             
-            finalSelections.sort(function(a,b) {
-              return b.rating - a.rating;
-            });
+            // finalSelections.sort(function(a,b) {
+            //   return b.rating - a.rating;
+            // });
 
-            resInfo = finalSelections.map(function(d){
-              return d.name + ", Rating: " + d.rating;
+            // resInfo = finalSelections.map(function(d){
+            //   return d.name + ", Rating: " + d.rating;
 
-            });
-            console.log(finalSelections)
+            // });
+            // console.log(finalSelections)
           })
         .on("mouseover", function () {
             d3.select(this).style("fill", "deeppink")
@@ -530,19 +542,39 @@
       
 
       stepThree.append("text")
-                .attr("x", mapWidth - 100)
-                .attr("y", mapHeight - 20)
+                .attr("x", quizWidth - 50)
+                .attr("y", 500)
                 .style("font-weight", "bold")
                 .text("See Results")
                 .on("click", function(){
+                  finalSelections.sort(function(a,b) {
+                    return b.rating - a.rating;
+                  });
+
+                  resInfo = finalSelections.map(function(d){
+                    return d.name + ", Rating: " + d.rating;
+
+                  });
+                  console.log(finalSelections)
                   d3.selectAll("text.cus").style("fill", "black").style("font-weight", "normal")
 
                   stepThree.style("display", "none")
                   stepFour.style("display", "")
-                  stepFour.append("text")
-                          .attr("x", 30)
-                          .attr("y", 90)
-                          .text(resInfo.join("\n"));
+                  // stepFour.append("text")
+                  //         .attr("x", 30)
+                  //         .attr("y", function(d, i){return `${i*2.3}em`})
+                  //         .text(resInfo.join("\n"));
+                  let results = stepFour.selectAll(".res-info")
+                          .data(resInfo)
+                          .enter()
+                          .append("text")
+                          .attr("class", "res-info")
+                          .attr("x", 20)
+                          .attr("y", function(d,i){return 80 + i*20;})
+                          .text(function(d){return d;});
+
+                  
+
                 })
 
       // RESTART BUTTON
@@ -563,18 +595,18 @@
         
 
       stepFour.append("text")
-          .text("These are your current restaurant matches")
+          .text("These are your current matches")
           .attr("x", quizWidth / 2)
           .attr("y", 30)
           .attr("text-anchor", "middle")
           .style("font-size", 24)
 
-      stepFour.append("text")
-          .text("Your selections:")
-          .attr("x", quizWidth / 2)
-          .attr("y", 55)
-          .attr("text-anchor", "middle")
-          .style("font-size", 16)
+      // stepFour.append("text")
+      //     .text("Your selections:")
+      //     .attr("x", quizWidth / 2)
+      //     .attr("y", 55)
+      //     .attr("text-anchor", "middle")
+      //     .style("font-size", 16)
 
       stepFour.selectAll(".res-info")
       .data(resInfo)
