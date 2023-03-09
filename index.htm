@@ -67,20 +67,12 @@
       const requestData = async () => {
         let restaurants = await d3.csv('boston_yelp_final.csv', d3.autoType)
         
-        console.log(restaurants);
-      
-
         let bostonRes = restaurants.filter(d => d.city === "Boston")
        
        //formatting the cuisine attribute
         bostonRes.forEach(function(d) {
         d.cuisine = JSON.parse(d.cuisine.replace(/'/g, '"'));
       });
-
-        // bostonRes.forEach(function(d) {
-        //   d.cuisine = JSON.parse(d.cuisine);
-        // });
-
       
         console.log(bostonRes[0].cuisine);
 
@@ -102,35 +94,12 @@
             .style("fill", "white")
             .attr( "stroke", "#999")
             .attr("d", path);
-      
-
-        //Adding the names to the neighborhoods
-
-        // map.selectAll(".neighborhood-label")
-        //     .data(neighborhoods_json.features)
-        //     .enter()
-        //     .append("text")
-        //     .attr("class", "neighborhood-label")
-        //     .attr("transform", function(d) {
-        //         return "translate(" + path.centroid(d) + ")";
-        //     })
-        //     .attr("dy", "0em")
-        //     .attr("dx", "-2em")
-        //     .attr("font-size", 4)
-        //     .text(function(d) { return d.properties.Name; });
-
-        
-        // label neighborhoods
 
         bostonRes.forEach( d => {
       
           d.Position = projection( [d.longitude, d.latitude] );
           
         });
-
-        console.log(restaurants[0])
-        console.log(neighborhoods)
-
 
         neighborhoods.append("text")
                     .attr("class", "neighborhood-label")
@@ -140,7 +109,7 @@
                     .attr("dy", ".35em")
                     .text(function(d) { return d.properties.Name; });
 
-        console.log(bostonRes)
+        console.log("res", bostonRes)
 
         let circles = map.selectAll("circle").data(bostonRes)
           .enter()
@@ -168,58 +137,35 @@
 
         }
 
-      map.selectAll(".neighborhood").on("click", selected);
-
-      //Neighborhood names show up on hover on bottom left
-            // var tooltip = d3.select("body")
-            //   .append("div")
-            //   .attr("class", "tooltip")
-            //   .style("opacity", 0);
-
-            // d3.selectAll(".neighborhood")
-            //   .on("mouseover", function(event, d) {
-            //     tooltip.transition()
-            //       .duration(200)
-            //       .style("opacity", 0.9);
-            //     tooltip.html(d.properties.Name)
-            //       .style("left", (event.pageX + 10) + "px")
-            //       .style("top", (event.pageY - 30) + "px");
-            //   })
-            //   .on("mouseout", function(d) {
-            //     tooltip.transition()
-            //       .duration(500)
-            //       .style("opacity", 0);
-            //   });
-
+      // map.selectAll(".neighborhood").on("click", selected);
     
-        function selected(event, d) {
-          //NOTE: this is Jeff's code, will change to original code, just wanted to test click and zoom
+        // function selected(event, d) {
+        //   //NOTE: this is Jeff's code, will change to original code, just wanted to test click and zoom
 
-          let bounds = path.bounds(d.geometry); 
-          let dx = bounds[1][0] - bounds[0][0]; 
-          let dy = bounds[1][1] - bounds[0][1]; 
-          let x = (bounds[0][0] + bounds[1][0]) / 2; 
-          let y = (bounds[0][1] + bounds[1][1]) / 2; 
+        //   let bounds = path.bounds(d.geometry); 
+        //   let dx = bounds[1][0] - bounds[0][0]; 
+        //   let dy = bounds[1][1] - bounds[0][1]; 
+        //   let x = (bounds[0][0] + bounds[1][0]) / 2; 
+        //   let y = (bounds[0][1] + bounds[1][1]) / 2; 
 
           
-          let scale = Math.max(1, Math.min(10, 0.9 / Math.max( dx / mapWidth, 
-                                                              dy / mapHeight )));
+        //   let scale = Math.max(1, Math.min(10, 0.9 / Math.max( dx / mapWidth, 
+        //                                                       dy / mapHeight )));
 
-          let translate = [mapWidth / 2 - x * scale, mapHeight / 2 - y * scale];
+        //   let translate = [mapWidth / 2 - x * scale, mapHeight / 2 - y * scale];
 
-          let newTransform = d3.zoomIdentity
-                                .translate(translate[0],translate[1])
-                                .scale(scale);
+        //   let newTransform = d3.zoomIdentity
+        //                         .translate(translate[0],translate[1])
+        //                         .scale(scale);
          
-          map.transition().duration(1000).call(zoom.transform, newTransform);         
+        //   map.transition().duration(1000).call(zoom.transform, newTransform);         
 
-        }
+        // }
 
         // quiz panel
         let svg2 = d3.select("svg#quiz")
         var quiz = svg2.append("g").attr("class", "quiz")
         var quizWidth = svg2.attr("width")
-
 
         // step one
         let stepOne = quiz.append("g")
@@ -232,33 +178,47 @@
           .style("font-size", 24)
         
         stepOne.append("text")
-          .text("Select a neighborhood using the buttons below:")
+          .text("Select your neighborhood(s) using the buttons below:")
           .attr("x", quizWidth / 2)
           .attr("y", 55)
           .attr("text-anchor", "middle")
           .style("font-size", 16)
 
-        let buttonContain = stepOne.append("g").attr("transform", `translate(0, ${mapHeight-410})`)
+        let buttonContain = stepOne.append("g").attr("transform", `translate(0, ${mapHeight-400})`)
 
-        var selections = new Array
+        let selections = new Array
+
+        // let filtered = bostonRes.filter(function(d){
+        //   !isNaN(d.neighborhood)
+        // })
+        // 
+        // console.log(filtered)
 
         let neighbor = new Set(bostonRes.map(d => d.neighborhood))
 
+        neighbor.forEach((d,i) => {
+          if(!isNaN(d)){
+            neighbor.delete(d)
+          }
+        })
+        console.log(neighbor)
+
+        // create neighborhood buttons
         let buttons = buttonContain.selectAll("text.button")
           .data(neighbor)
           .join("text")
           .attr("class", "button")
           .text(d => d)
           .attr("x", function(d,i){
-            if(i>8){return 400}
+            if(i>7){return 400}
             else{return 40}
           })
           .attr("dy", function(d,i){
-            if (i>8){
-              x=i-9
-              return `${x*2}em`
+            if (i>7){
+              x=i-8
+              return `${x*2.5}em`
             }
-            else{return `${i*2}em`}
+            else{return `${i*2.5}em`}
           })
           .on("click", function(event, d){
             
@@ -272,7 +232,18 @@
               d3.select(this).classed("clicked", true);
             }
 
-            updateCircles();
+            var resCircles = d3.selectAll("circle")
+            resCircles.each(function () {
+              d3.select(this)
+                .style("fill", d => {
+                  if (selections.includes(d['neighborhood'])) { return "blue" }
+                  else { return "lightgrey" }
+                })
+                .style("opacity", d => {
+                  if (selections.includes(d['neighborhood'])) { return 1 }
+                  else { return 0.6 }
+                })
+            })  
 
           })
           .on("mouseover", function(){
@@ -287,34 +258,22 @@
             }
           })
 
-      // update circles function
-      function updateCircles(){
-        var resCircles = d3.selectAll("circle")
-        resCircles.each(function () {
-          d3.select(this)
-            .style("fill", d => {
-              if (selections.includes(d['neighborhood'])) { return "blue" }
-              else { return "lightgrey" }
-            })
-            .style("opacity", d => {
-              if (selections.includes(d['neighborhood'])) { return 1 }
-              else { return 0.6 }
-            })
-        })  
+      
 
-      };
-
-      // create a next button? --> clicking this button will return a filtered dataframe for step 2
+      // NEXT BUTTON
       stepOne.append("text")
                 .attr("x", mapWidth - 60)
                 .attr("y", mapHeight - 20)
                 .style("font-weight", "bold")
                 .text("Next")
                 .on("click", function(){
+                  d3.selectAll("text.button").style("fill", "black").style("font-weight", "normal")
                   stepOne.style("display", "none")
                   stepTwo.style("display", "")  
                 })
 
+
+      // step two
       let stepTwo = quiz.append("g").attr("id", "step2")
  
       let estabContain = stepTwo.append("g").attr("transform", `translate(0, ${mapHeight/2})`)
@@ -326,23 +285,23 @@
           .attr("text-anchor", "middle")
           .style("font-size", 24)
 
-        stepTwo.append("text")
-          .text("Select a type of establishment using the icons below:")
+      stepTwo.append("text")
+          .text("Select your type(s) of establishment using the icons below:")
           .attr("x", quizWidth / 2)
           .attr("y", 55)
           .attr("text-anchor", "middle")
           .style("font-size", 16)
 
-        stepTwo.style("display", "none")
+      stepTwo.style("display", "none")
       
       let estabList= new Set(restaurants.map(d => d.estab))
-      console.log(estabList)
 
+      // load cuisines
       const cuisines = await d3.csv('cuisines.csv')
-      console.log(cuisines)
       
       var estSelections = new Array
 
+      // list types of estabs
       let estabs = estabContain.selectAll("text.estab")
           .data(estabList)
           .join("text")
@@ -365,6 +324,7 @@
 
             var resCircles = d3.selectAll("circle")
             resCircles.each(function () {
+    
               d3.select(this)
                 .style("fill", d => {
                   if (selections.includes(d['neighborhood']) && estSelections.includes(d['estab'])) { return "blue" }
@@ -388,14 +348,17 @@
             }
           })
 
-      estabContain.selectAll("image").data(estabList)
+      // icons from flaticon: https://www.flaticon.com/search?word=food&color=color&shape=outline
+      estabContain.selectAll("image.estab").data(estabList)
         .join("image")
+        .attr("class", "estab")
         .attr("x",(d,i) => 110+100*i)
         .attr("y", estabs.attr("y")-60)
         .attr('width', 40)
         .attr('height', 40)
         .attr("xlink:href", d => `icons/estab/${d.replace("/", ":")}.png`)
 
+      // NEXT BUTTON
       stepTwo.append("text")
                 .attr("x", mapWidth - 60)
                 .attr("y", mapHeight - 20)
@@ -407,23 +370,28 @@
                   //   stepTwo.style("display", "none")
                   //   stepFour.style("display", "")
                   // }
+                  d3.selectAll("text.estab").style("fill", "black").style("font-weight", "normal")
+
                   stepTwo.style("display", "none")
                   stepThree.style("display", "")
                   
                 })
 
+      // RESTART BUTTON
       stepTwo.append("text")
                 .attr("x", 20)
                 .attr("y", mapHeight - 20)
-                .style("font-weight", "bold")
-                .text("Back")
+                .text("Restart Quiz")
+                .style("fill", "red")
                 .on("click", function(){
+                  d3.selectAll("circle").style("fill", "lightgrey").style("opacity", 0.6)
                   stepOne.style("display", "")
                   stepTwo.style("display", "none")
                 })
                 
                 
       // STEP THREE 
+
       let stepThree = quiz.append("g").attr("id", "step3")
 
       
@@ -432,17 +400,15 @@
       'seafood', 'mediterranean', 'sandwich', 'healthy', 'spanish', 'asian_fusion', 'indian_pakistani', 
       'french', 'chinese', 'latin', 'thai', 'middle_east', 'polish_ukr']
 
-      console.log(cuisineList)
-
       stepThree.append("text")
-          .text("What type of cuisine are you looking for?")
+          .text("What cuisines do you like?")
           .attr("x", quizWidth / 2)
           .attr("y", 30)
           .attr("text-anchor", "middle")
           .style("font-size", 24)
 
       stepThree.append("text")
-          .text("Select a type of cuisine using the icons below:")
+          .text("Select your cuisine(s) using the icons below:")
           .attr("x", quizWidth / 2)
           .attr("y", 55)
           .attr("text-anchor", "middle")
@@ -452,6 +418,7 @@
       var finalSelections = new Array 
       var resInfo = new Array
 
+      
           
       let cuis = cusContain.selectAll("text.cus")
           .data(cuisineList)
@@ -460,16 +427,16 @@
           .text(d => d)
           .attr("x", function(d,i){
             if(i>9){return 400}
-            else{return 30}
+            else{return 100}
           })
           .attr("y", function(d,i){
             if (i>9){
               x=i-14
-              return `${x*2}em`
+              return `${x*2.3}em`
             }
             else{
               x=i-4
-              return `${x*2}em`}
+              return `${x*2.3}em`}
           })
           .on("click", function(event, d){
       
@@ -491,7 +458,7 @@
                         if(selections.includes(d['neighborhood']) && 
                           estSelections.includes(d['estab']) && 
                           (d['cuisine']).some(r => cuisineSelections.includes(r))){ 
-
+                            
                             if(!finalSelections.includes(d)){
                               finalSelections.push(d);
         
@@ -531,34 +498,55 @@
             }
         })
 
+      // icons from flaticon: https://www.flaticon.com/search?word=food&color=color&shape=outline
+      cusContain.selectAll("image.cuis").data(cuisineList)
+          .join("image")
+          .attr("class", "cuis")
+          .attr("x", function (d, i) {
+          if (i > 9) { return 400 }
+          else { return 100 }
+          })
+          .attr("y", function(d,i){
+            if (i>9){
+              x=i-14
+              return `${x*2.3}em`
+            }
+            else{
+              x=i-4
+              return `${x*2.3}em`}})
+          .attr("transform", "translate(-50, -20)")
+          .attr('width', 30)
+          .attr('height', 30)
+          .attr("xlink:href", d => `icons/${d.replace("/", ":")}.png`)
+
       stepThree.style("display", "none")
 
+      
+
       stepThree.append("text")
-                .attr("x", mapWidth - 60)
+                .attr("x", mapWidth - 100)
                 .attr("y", mapHeight - 20)
                 .style("font-weight", "bold")
-                .text("Next")
+                .text("See Results")
                 .on("click", function(){
+                  d3.selectAll("text.cus").style("fill", "black").style("font-weight", "normal")
                   stepThree.style("display", "none")
                   stepFour.style("display", "")
-                  // stepFour.append("text")
-                  //         .attr("x", quizWidth / 2)
-                  //         .attr("y", 70)
-                  //         .text(function(d) { return selections.toString()})
-
                   stepFour.append("text")
                           .attr("x", 30)
                           .attr("y", 90)
                           .text(resInfo.join("\n"));
                 })
 
+      // RESTART BUTTON
       stepThree.append("text")
                 .attr("x", 20)
                 .attr("y", mapHeight - 20)
-                .style("font-weight", "bold")
-                .text("Back")
+                .text("Restart Quiz")
+                .style("fill", "red")
                 .on("click", function(){
-                  stepTwo.style("display", "")
+                  d3.selectAll("circle").style("fill", "lightgrey").style("opacity", 0.6)
+                  stepOne.style("display", "")
                   stepThree.style("display", "none")
                 })
 
@@ -590,14 +578,16 @@
       .attr("y", function(d,i){return 80 + i*20;})
       .text(function(d){return d;});
 
+      // RESTART BUTTON
       stepFour.append("text")
           .attr("x", 20)
           .attr("y", mapHeight - 20)
-          .style("font-weight", "bold")
-          .text("Back")
+          .style("fill", "red")
+          .text("Restart Quiz")
           .on("click", function () {
+            d3.selectAll("circle").style("fill", "lightgrey").style("opacity", 0.6)
+            stepOne.style("display", "")
             stepFour.style("display", "none")
-            stepThree.style("display", "")
           })
 
       // stepFour.append("text")
