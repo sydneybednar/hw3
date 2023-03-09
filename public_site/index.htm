@@ -128,7 +128,7 @@
         let circles = map.selectAll("circle").data(bostonRes)
           .enter()
           .append("circle")
-          .attr("id", d => d.name)
+          .attr("id", function(d){ return d.name + ", Rating: " + d.rating; })
           .attr("class", d => d.neighborhood)
           .attr("r", 1.5)
           .attr("fill", "lightgrey")
@@ -150,31 +150,6 @@
           map.attr("transform", transform.toString() );
 
         }
-
-      // map.selectAll(".neighborhood").on("click", selected);
-    
-        // function selected(event, d) {
-        //   //NOTE: this is Jeff's code, will change to original code, just wanted to test click and zoom
-
-        //   let bounds = path.bounds(d.geometry); 
-        //   let dx = bounds[1][0] - bounds[0][0]; 
-        //   let dy = bounds[1][1] - bounds[0][1]; 
-        //   let x = (bounds[0][0] + bounds[1][0]) / 2; 
-        //   let y = (bounds[0][1] + bounds[1][1]) / 2; 
-
-          
-        //   let scale = Math.max(1, Math.min(10, 0.9 / Math.max( dx / mapWidth, 
-        //                                                       dy / mapHeight )));
-
-        //   let translate = [mapWidth / 2 - x * scale, mapHeight / 2 - y * scale];
-
-        //   let newTransform = d3.zoomIdentity
-        //                         .translate(translate[0],translate[1])
-        //                         .scale(scale);
-         
-        //   map.transition().duration(1000).call(zoom.transform, newTransform);         
-
-        // }
 
         // quiz panel
         var quizDiv = d3.select("div#quiz")
@@ -281,8 +256,8 @@
 
       // NEXT BUTTON
       stepOne.append("text")
-                .attr("x", quizWidth - 60)
-                .attr("y", mapHeight-20)
+                .attr("x", quizWidth - 80)
+                .attr("y", mapHeight-40)
                 .style("font-weight", "bold")
                 .text("Next")
                 .on("click", function(){
@@ -297,7 +272,7 @@
       // RESTART BUTTON
         stepOne.append("text")
           .attr("x", 20)
-          .attr("y", mapHeight - 20)
+          .attr("y", mapHeight - 40)
           .text("Restart Quiz")
           .style("fill", "red")
           .on("click", function () {
@@ -320,7 +295,7 @@
           .style("font-size", 24)
 
       stepTwo.append("text")
-          .text("Select your type(s) of establishment using the icons below:")
+          .text("Select your type(s) of establishment below:")
           .attr("x", quizWidth / 2)
           .attr("y", 55)
           .attr("text-anchor", "middle")
@@ -394,16 +369,12 @@
 
       // NEXT BUTTON
       stepTwo.append("text")
-                .attr("x", quizWidth - 60)
-                .attr("y", mapHeight - 20)
+                .attr("x", quizWidth - 80)
+                .attr("y", mapHeight - 40)
                 .style("font-weight", "bold")
                 .text("Next")
                 .on("click", function(){
-                  // skip last step if just selected coffee/cafe
-                  // if(estSelections[0]==='coffee/cafe' && estSelections.length===1){
-                  //   stepTwo.style("display", "none")
-                  //   stepFour.style("display", "")
-                  // }
+                  
                   if (estSelections.length === 0) {
                     estSelections = Array.from(estabList)
                   }
@@ -417,7 +388,7 @@
       // RESTART BUTTON
       stepTwo.append("text")
                 .attr("x", 20)
-                .attr("y", mapHeight - 20)
+                .attr("y", mapHeight - 40)
                 .text("Restart Quiz")
                 .style("fill", "red")
                 .on("click", function(){
@@ -445,7 +416,7 @@
           .style("font-size", 24)
 
       stepThree.append("text")
-          .text("Select your cuisine(s) using the icons below:")
+          .text("Select your cuisine(s) below:")
           .attr("x", quizWidth / 2)
           .attr("y", 55)
           .attr("text-anchor", "middle")
@@ -512,16 +483,6 @@
                   })
             });
             
-            
-            // finalSelections.sort(function(a,b) {
-            //   return b.rating - a.rating;
-            // });
-
-            // resInfo = finalSelections.map(function(d){
-            //   return d.name + ", Rating: " + d.rating;
-
-            // });
-            // console.log(finalSelections)
           })
         .on("mouseover", function () {
             d3.select(this).style("fill", "deeppink")
@@ -558,11 +519,11 @@
 
       stepThree.style("display", "none")
 
-      
+      var resSelections = new Array;
 
       stepThree.append("text")
-                .attr("x", quizWidth - 100)
-                .attr("y", mapHeight - 20 )
+                .attr("x", quizWidth - 120)
+                .attr("y", mapHeight - 40 )
                 .style("font-weight", "bold")
                 .text("See Results")
                 .on("click", function(){
@@ -580,14 +541,11 @@
 
                   });
                   console.log(finalSelections)
+                  console.log(resInfo)
                   d3.selectAll("text.cus").style("fill", "black").style("font-weight", "normal")
 
                   stepThree.style("display", "none")
                   stepFour.style("display", "")
-                  // stepFour.append("text")
-                  //         .attr("x", 30)
-                  //         .attr("y", function(d, i){return `${i*2.3}em`})
-                  //         .text(resInfo.join("\n"));
                   let results = stepFour.selectAll(".res-info")
                           .data(resInfo)
                           .enter()
@@ -595,16 +553,50 @@
                           .attr("class", "res-info")
                           .attr("x", 20)
                           .attr("y", function(d,i){return 80 + i*20;})
-                          .text(function(d){return d;});
-
+                          .text(function(d){return d;});  
                   
+                          
+                  results.on("click", function(event, d){
+                    
+                    if (resSelections.includes(d)) {
 
-                })
+                      resSelections = resSelections.filter(item =>item !==d);
+                      d3.select(this).classed("clicked", false)
+                        .style("font-weight", "normal")
+                        .attr("fill", "black");
+
+                      } else {
+                        resSelections.push(d);
+                        d3.select(this).classed("clicked", true)
+                          .style("font-weight", "bold")
+                          .attr("fill", "deeppink");
+                      }
+                      console.log(resSelections)
+                
+      
+                      let resCircles = d3.selectAll("circle")
+                      resCircles.each( function(element) {        
+                          let selection = d3.select(this)
+                          selection.style("fill",function(element){
+                                  
+                              if(resSelections.includes(selection.attr("id"))){ 
+                                    console.log(true)
+                                      return "blue"}
+                                  
+                              else{ return "lightgrey"}                              
+                            })
+                            .style("opacity", function (d) {
+                              if (resSelections.includes(selection.attr("id"))) {return 1}
+                              else{return 0.3}
+                            })
+                      });
+
+                })})
 
       // RESTART BUTTON
       stepThree.append("text")
                 .attr("x", 20)
-                .attr("y", mapHeight - 20)
+                .attr("y", mapHeight - 40)
                 .text("Restart Quiz")
                 .style("fill", "red")
                 .on("click", function(){
@@ -625,26 +617,11 @@
           .attr("text-anchor", "middle")
           .style("font-size", 24)
 
-      // stepFour.append("text")
-      //     .text("Your selections:")
-      //     .attr("x", quizWidth / 2)
-      //     .attr("y", 55)
-      //     .attr("text-anchor", "middle")
-      //     .style("font-size", 16)
-
-      stepFour.selectAll(".res-info")
-      .data(resInfo)
-      .enter()
-      .append("text")
-      .attr("class", "res-info")
-      .attr("x", 20)
-      .attr("y", function(d,i){return 80 + i*20;})
-      .text(function(d){return d;});
 
       // RESTART BUTTON
       stepFour.append("text")
           .attr("x", 20)
-          .attr("y", svg2.attr("height") - 20)
+          .attr("y", 55)
           .style("fill", "red")
           .text("Restart Quiz")
           .on("click", function () {
@@ -652,27 +629,6 @@
             stepOne.style("display", "")
             stepFour.style("display", "none")
           })
-
-      // stepFour.append("text")
-      //     .text("Neighborhoods:")
-      //     .attr("x", quizWidth / 3)
-      //     .attr("y", 70)
-      //     .attr("text-anchor", "middle")
-      //     .style("font-size", 16)
-      
-      // stepFour.append("text")
-      //     .attr("x", quizWidth / 2)
-      //     .attr("y", 70)
-      //     .text(function(d) { return resInfo.toString()})
-
-      // console.log(selections)
-
-      // stepFour.append("text")
-      //     .text("Your selections:")
-      //     .attr("x", quizWidth / 2)
-      //     .attr("y", 55)
-      //     .attr("text-anchor", "middle")
-      //     .style("font-size", 16)
 
     
       stepFour.style("display", "none")
