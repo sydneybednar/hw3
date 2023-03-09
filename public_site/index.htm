@@ -9,6 +9,8 @@
             font-family: 'Lato', 'Helvetica', sans-serif;
             margin: 20px;
             font-family: "Avenir", sans-serif;
+            font-style: italic;
+            background-color: rgb(255, 240, 190);
         }
 
         h1 {
@@ -17,6 +19,8 @@
             text-align: center;
             align-self: center;
             align-content: center;
+            font-style: italic;
+            color: rgb(73, 40, 0);
         }
 
         h1.title{
@@ -59,9 +63,10 @@
 
 
     <div class="title">
-    <h1>[Title Here]</h1>
+    <h1>Find your restaurant matches!</h1>
     
-    <p> [Intro Here]
+    <p> Take our quiz to discover new restaurants in Boston!Keep an eye on the map to see
+      your matches update.
     </p>
     </div>
 
@@ -611,7 +616,7 @@
         
 
       stepFour.append("text")
-          .text("These are your current matches")
+          .text("These are your best matches!")
           .attr("x", quizWidth / 2)
           .attr("y", 30)
           .attr("text-anchor", "middle")
