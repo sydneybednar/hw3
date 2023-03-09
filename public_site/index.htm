@@ -39,12 +39,17 @@
         div#quiz{
           width: 600;
           height: 500;
-          overflow-y: auto;
+          /* overflow-y: auto; */
+          padding-left: 150;
         }
 
 
         div#container{
           display: flex;
+        }
+
+        p{
+          font-size: 28;
         }
 
        
@@ -65,7 +70,7 @@
     <div class="title">
     <h1>Find your restaurant matches!</h1>
     
-    <p> Take our quiz to discover new restaurants in Boston!Keep an eye on the map to see
+    <p> Take our quiz to discover new restaurants in Boston! Keep an eye on the map to see
       your matches update.
     </p>
     </div>
@@ -73,8 +78,8 @@
     <!-- <div id="buttons"></div>
     <div> -->
     <div id="container">
-    <svg id="map", width = "600", height = "500"></svg>
-    <div id ="quiz", width = "600", height = "500",style="border: 1px solid black"></div>
+    <svg id="map", width = "800", height = "700"></svg>
+    <div id ="quiz", width = "800", height = "700",style="border: 1px solid black"></div>
     </div>
     <!-- <svg id="quiz", width="600", height="500", style="border: 1px solid black"></svg> -->
     <script>
@@ -159,39 +164,33 @@
         // quiz panel
         var quizDiv = d3.select("div#quiz")
         // let svg2 = d3.select("svg#quiz")
-        var svg2 = quizDiv.append("svg").attr("class", "quiz").attr("width", 610).attr("height", 1500)
+        var svg2 = quizDiv.append("svg").attr("class", "quiz").attr("width", 700).attr("height", 650)
         var quiz = svg2.append("g").attr("class", "quiz")
         // .attr("transform", `translate(0, ${quizHeight-400})`)
-        var quizWidth = quizDiv.attr("width")
-        var quizHeight = quizDiv.attr("height")
+        var quizWidth = svg2.attr("width")
+        var quizHeight = svg2.attr("height")
         console.log(quizWidth)
 
         // step one
-        let stepOne = quiz.append("g")
+        let stepOne = quiz.append("g").attr("id", "step1")
 
         stepOne.append("text")
           .text("Welcome to Boston!")
           .attr("x", quizWidth / 2)
-          .attr("y", 30)
+          .attr("y", 40)
           .attr("text-anchor", "middle")
           .style("font-size", 24)
         
         stepOne.append("text")
           .text("Select your neighborhood(s) using the buttons below:")
           .attr("x", quizWidth / 2)
-          .attr("y", 55)
+          .attr("y", 80)
           .attr("text-anchor", "middle")
           .style("font-size", 16)
 
-        let buttonContain = stepOne.append("g").attr("transform", `translate(0, ${mapHeight-400})`)
+        let buttonContain = stepOne.append("g").attr("transform", `translate(0, ${quizHeight-400})`)
 
         let selections = new Array
-
-        // let filtered = bostonRes.filter(function(d){
-        //   !isNaN(d.neighborhood)
-        // })
-        // 
-        // console.log(filtered)
 
         let neighbor = new Set(bostonRes.map(d => d.neighborhood))
 
@@ -209,15 +208,17 @@
           .attr("class", "button")
           .text(d => d)
           .attr("x", function(d,i){
-            if(i>7){return 400}
+            if(i>7){return 500}
             else{return 40}
           })
-          .attr("dy", function(d,i){
+          .attr("y", function(d,i){
             if (i>7){
-              x=i-8
-              return `${x*2.5}em`
+              x=i-10
+              return `${x*3}em`
             }
-            else{return `${i*2.5}em`}
+            else{
+              x=i-2
+              return `${x*3}em`}
           })
           .on("click", function(event, d){
             
@@ -262,7 +263,7 @@
       // NEXT BUTTON
       stepOne.append("text")
                 .attr("x", quizWidth - 80)
-                .attr("y", mapHeight-40)
+                .attr("y", quizHeight-20)
                 .style("font-weight", "bold")
                 .text("Next")
                 .on("click", function(){
@@ -277,7 +278,7 @@
       // RESTART BUTTON
         stepOne.append("text")
           .attr("x", 20)
-          .attr("y", mapHeight - 40)
+          .attr("y", quizHeight - 20)
           .text("Restart Quiz")
           .style("fill", "red")
           .on("click", function () {
@@ -290,19 +291,19 @@
       // step two
       let stepTwo = quiz.append("g").attr("id", "step2")
  
-      let estabContain = stepTwo.append("g").attr("transform", `translate(0, ${mapHeight/2})`)
+      let estabContain = stepTwo.append("g").attr("transform", `translate(0, ${quizHeight/2})`)
 
       stepTwo.append("text")
           .text("What type of establishment are you looking for?")
           .attr("x", quizWidth / 2)
-          .attr("y", 30)
+          .attr("y", 40)
           .attr("text-anchor", "middle")
           .style("font-size", 24)
 
       stepTwo.append("text")
           .text("Select your type(s) of establishment below:")
           .attr("x", quizWidth / 2)
-          .attr("y", 55)
+          .attr("y", 80)
           .attr("text-anchor", "middle")
           .style("font-size", 16)
 
@@ -321,7 +322,7 @@
           .join("text")
           .attr("class", "estab")
           .text(d => d)
-          .attr("x", (d, i) => 100+i*100)
+          .attr("x", (d, i) => 150+i*100)
           .on("click", function(event, d){
 
 
@@ -366,8 +367,8 @@
       estabContain.selectAll("image.estab").data(estabList)
         .join("image")
         .attr("class", "estab")
-        .attr("x",(d,i) => 110+100*i)
-        .attr("y", estabs.attr("y")-60)
+        .attr("x",(d,i) => 160+100*i)
+        .attr("y", estabs.attr("y")-80)
         .attr('width', 40)
         .attr('height', 40)
         .attr("xlink:href", d => `icons/estab/${d.replace("/", ":")}.png`)
@@ -375,7 +376,7 @@
       // NEXT BUTTON
       stepTwo.append("text")
                 .attr("x", quizWidth - 80)
-                .attr("y", mapHeight - 40)
+                .attr("y", quizHeight - 20)
                 .style("font-weight", "bold")
                 .text("Next")
                 .on("click", function(){
@@ -393,7 +394,7 @@
       // RESTART BUTTON
       stepTwo.append("text")
                 .attr("x", 20)
-                .attr("y", mapHeight - 40)
+                .attr("y", quizHeight - 20)
                 .text("Restart Quiz")
                 .style("fill", "red")
                 .on("click", function(){
@@ -408,7 +409,7 @@
       let stepThree = quiz.append("g").attr("id", "step3")
 
       
-      let cusContain = stepThree.append("g").attr("transform", `translate(0, ${mapHeight/2})`)
+      let cusContain = stepThree.append("g").attr("transform", `translate(0, ${quizHeight/2})`)
       let cuisineList = [ 'american', 'breakfast', 'mexican', 'japanese', 'vietnamese', 'italian', 
       'seafood', 'mediterranean', 'sandwich', 'healthy', 'spanish', 'asian_fusion', 'indian_pakistani', 
       'french', 'chinese', 'latin', 'thai', 'middle_east', 'polish_ukr']
@@ -416,14 +417,14 @@
       stepThree.append("text")
           .text("What cuisines do you like?")
           .attr("x", quizWidth / 2)
-          .attr("y", 30)
+          .attr("y", 40)
           .attr("text-anchor", "middle")
           .style("font-size", 24)
 
       stepThree.append("text")
           .text("Select your cuisine(s) below:")
           .attr("x", quizWidth / 2)
-          .attr("y", 55)
+          .attr("y", 80)
           .attr("text-anchor", "middle")
           .style("font-size", 16)
 
@@ -439,7 +440,7 @@
           .attr("class", "cus")
           .text(d => d)
           .attr("x", function(d,i){
-            if(i>9){return 400}
+            if(i>9){return 500}
             else{return 100}
           })
           .attr("y", function(d,i){
@@ -506,7 +507,7 @@
           .join("image")
           .attr("class", "cuis")
           .attr("x", function (d, i) {
-          if (i > 9) { return 400 }
+          if (i > 9) { return 500 }
           else { return 100 }
           })
           .attr("y", function(d,i){
@@ -527,8 +528,8 @@
       var resSelections = new Array;
 
       stepThree.append("text")
-                .attr("x", quizWidth - 120)
-                .attr("y", mapHeight - 40 )
+                .attr("x", quizWidth - 100)
+                .attr("y", quizHeight - 20 )
                 .style("font-weight", "bold")
                 .text("See Results")
                 .on("click", function(){
@@ -557,8 +558,8 @@
                           .append("text")
                           .attr("class", "res-info")
                           .attr("x", 20)
-                          .attr("y", function(d,i){return 80 + i*20;})
-                          .text(function(d){return d;});  
+                          .attr("y", function(d,i){return 80 + i*30;})
+                          .text(function(d, i){if (i <= 10) return d;});  
                   
                           
                   results.on("click", function(event, d){
@@ -596,12 +597,21 @@
                             })
                       });
 
-                })})
+                })
+                .on("mouseout", function (e) {
+                  if (d3.select(this).attr("class") != "estab clicked") {
+                    d3.select(this).style("fill", "black")
+                  }
+                  else {
+                    d3.select(this).style("font-weight", "bold")
+                  }
+                })
+              })
 
       // RESTART BUTTON
       stepThree.append("text")
                 .attr("x", 20)
-                .attr("y", mapHeight - 40)
+                .attr("y", quizHeight - 20)
                 .text("Restart Quiz")
                 .style("fill", "red")
                 .on("click", function(){
@@ -626,7 +636,7 @@
       // RESTART BUTTON
       stepFour.append("text")
           .attr("x", 20)
-          .attr("y", 55)
+          .attr("y", quizHeight - 20)
           .style("fill", "red")
           .text("Restart Quiz")
           .on("click", function () {
